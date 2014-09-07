@@ -9,7 +9,8 @@ output: html_document
 
 Load the necessary packages,download & unzip the file, and load the data. The first histogram in the assignment is shown below.
 
-```{r}
+
+```r
 library(dplyr)
 library(ggplot2)
 #download.file('https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip','activity.zip')
@@ -21,7 +22,8 @@ a <- read.csv('activity.csv',header = T)
 
 Create a histogram to answer the question.
 
-```{r}
+
+```r
 byday <- select(a,steps,date) %>%
   group_by(date) %>%
   summarise(Total = sum(steps,na.rm = T))
@@ -31,11 +33,25 @@ a.hist <- ggplot(byday,aes(date,Total)) + geom_histogram(stat = 'identity') +
 a.hist
 ```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
 Find the mean and median total steps per day.
 
-```{r}
+
+```r
 mean(byday$Total,na.rm = T)
+```
+
+```
+## [1] 9354
+```
+
+```r
 median(byday$Total,na.rm = T)
+```
+
+```
+## [1] 10395
 ```
 
 
@@ -43,7 +59,8 @@ median(byday$Total,na.rm = T)
 
 Create a time series plot to answer the question.
 
-```{r}
+
+```r
 byinterval<- select(a,steps,interval) %>%
   group_by(interval) %>%
   summarise(Mean = mean(steps,na.rm = T))
@@ -54,10 +71,17 @@ ts <- ggplot(byinterval,aes(interval,Mean)) + geom_line() +
 ts
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
 Determine the exact interval with the maximum steps per day.
 
-```{r}
+
+```r
 byinterval[byinterval$Mean == max(byinterval$Mean,na.rm = T),'interval']
+```
+
+```
+## [1] 835
 ```
 
 ###Imputing missing values
@@ -67,7 +91,8 @@ was implemented:
 
 Find the mean steps for each interval.
 
-```{r}
+
+```r
 impute <- select(a,steps,interval) %>%
   group_by(interval) %>%
   summarise(mean.interval = mean(steps,na.rm = T))
@@ -75,14 +100,16 @@ impute <- select(a,steps,interval) %>%
 
 Replace missing values with the interval mean using the interval as the index.
 
-```{r}
+
+```r
 new.a <- merge(a,impute,by = 'interval')
 new.a <- mutate(new.a,stepswimp = ifelse(is.na(steps),mean.interval,steps))
 ```
 
 Recreate Figure 1 and mean/median for the each day.
 
-```{r}
+
+```r
 byday.new <- select(new.a,stepswimp,date) %>%
   group_by(date) %>%
   summarise(Total = mean(stepswimp,na.rm = T))
@@ -90,21 +117,39 @@ new.hist <- ggplot(byday.new,aes(date,Total)) + geom_histogram(stat = 'identity'
   labs(title = 'Figure 3: Total Steps per Day with Imputed Values',x = 'Date',y = 'Total Daily Steps') +
   theme(axis.text.x  = element_text(angle=90))  
 new.hist
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
+```r
 mean(byday.new$Total,na.rm = T)
+```
+
+```
+## [1] 37.38
+```
+
+```r
 median(byday.new$Total,na.rm = T)
+```
+
+```
+## [1] 37.38
 ```
 
 ###Are there differences in activity patterns between weekdays and weekends?
 
 Add the Day Type levels (Weekend,Weekday).
 
-```{r}
+
+```r
 new.a <- mutate(new.a,Day.Type = ifelse(weekdays(as.Date(date)) == c('Saturday','Sunday'),'Weekend','Weekday'))
 ```
 
 Create a time series plot with facets by Day Type.
 
-```{r}
+
+```r
 byinterval.new <- select(new.a,steps,interval,Day.Type) %>%
   group_by(interval,Day.Type) %>%
   summarise(Mean = mean(steps,na.rm = T))
@@ -114,3 +159,5 @@ ts.new <- ggplot(byinterval.new,aes(interval,Mean)) + geom_line() +
        x = 'Interval', y = 'Mean Steps per Interval') + facet_grid(Day.Type ~.)
 ts.new
 ```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
