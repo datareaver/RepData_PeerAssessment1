@@ -12,7 +12,7 @@ Load the necessary packages,download & unzip the file, and load the data. The fi
 ```{r}
 library(dplyr)
 library(ggplot2)
-download.file('https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip','activity.zip')
+#download.file('https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip','activity.zip')
 unzip('activity.zip')
 a <- read.csv('activity.csv',header = T)
 ```
